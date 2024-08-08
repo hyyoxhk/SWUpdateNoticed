@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=SWUpdate
+Comment=Qt for swupdate notice
+Exec=SWUpdateNoticed
+Type=Application
