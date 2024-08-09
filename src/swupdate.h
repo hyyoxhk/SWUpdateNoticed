@@ -9,7 +9,7 @@ class QTimer;
 class SWUpdate : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(QVariantHash msg READ getMsg CONSTANT)
+    Q_PROPERTY(QVariantMap msg READ getMsg CONSTANT)
 
 public:
     static SWUpdate *self()
@@ -31,12 +31,12 @@ protected Q_SLOTS:
     void onConnected(void);
 
 private:
-    QVariantHash getMsg();
+    QVariantMap getMsg();
     QTimer *m_timer;
     int m_ipcFd;
     unsigned int m_curstep;
     unsigned int m_percent;
-    QVariantHash m_msg;
+    QVariantMap m_msg;
 
     bool wait_update;
 };

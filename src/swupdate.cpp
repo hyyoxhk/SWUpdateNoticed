@@ -131,7 +131,7 @@ void SWUpdate::onActivated(void)
     }
 }
 
-QVariantHash SWUpdate::getMsg()
+QVariantMap SWUpdate::getMsg()
 {
     return m_msg;
 }
