@@ -1,5 +1,6 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QSharedMemory>
 #include <QLocale>
 #include <QLibraryInfo>
 #include <QTranslator>
@@ -11,6 +12,15 @@
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
+
+    QSharedMemory sharedMemory("swupdate-shared");
+    if (!sharedMemory.create(1)) {
+        sharedMemory.attach(QSharedMemory::ReadOnly);
+        sharedMemory.detach();
+        if (!sharedMemory.create(1)) {
+            return 0;
+        }
+    }
 
     QString locale = QLocale::system().name();
     QTranslator qtTranslator;
