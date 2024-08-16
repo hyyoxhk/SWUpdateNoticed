@@ -12,14 +12,7 @@ class SWUpdate : public QObject
     Q_PROPERTY(QVariantMap msg READ getMsg CONSTANT)
 
 public:
-    static SWUpdate *self()
-    {
-        static SWUpdate app;
-        return &app;
-    }
-
-    explicit SWUpdate(QObject *parent = nullptr);
-    ~SWUpdate();
+    static SWUpdate *self();
 
 Q_SIGNALS:
     void start();
@@ -31,6 +24,10 @@ protected Q_SLOTS:
     void onConnected(void);
 
 private:
+    explicit SWUpdate(QObject *parent = nullptr);
+    ~SWUpdate();
+
+    static SWUpdate *m_app;
     QVariantMap getMsg();
     QTimer *m_timer;
     int m_ipcFd;

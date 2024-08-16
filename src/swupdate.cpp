@@ -8,6 +8,15 @@
 
 #include "swupdate.h"
 
+SWUpdate* SWUpdate::m_app = nullptr;
+
+SWUpdate* SWUpdate::self()
+{
+    if (m_app == nullptr)
+        m_app = new SWUpdate();
+    return m_app;
+}
+
 SWUpdate::SWUpdate(QObject *parent)
     : QObject(parent)
 {
@@ -25,6 +34,7 @@ SWUpdate::~SWUpdate()
     }
 
     delete m_timer;
+    delete m_app;
 }
 
 void SWUpdate::onConnected(void)
