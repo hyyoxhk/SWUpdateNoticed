@@ -6,6 +6,12 @@
 
 class QTimer;
 
+/**
+ * @brief SWUpdate class handles the software update process
+ * 
+ * This class manages the communication with the swupdate daemon
+ * and provides progress information to the UI.
+ */
 class SWUpdate : public QObject
 {
     Q_OBJECT
@@ -27,15 +33,18 @@ private:
     explicit SWUpdate(QObject *parent = nullptr);
     ~SWUpdate();
 
-    static SWUpdate *m_app;
-    QVariantMap getMsg();
-    QTimer *m_timer;
-    int m_ipcFd;
-    unsigned int m_curstep;
-    unsigned int m_percent;
-    QVariantMap m_msg;
+    void handleStartMessage(struct progress_msg &msg);
+    void handleUpdateMessage(struct progress_msg &msg);
+    QVariantMap getMsg() const;
 
-    bool wait_update;
+    static SWUpdate *m_app;
+
+    QTimer *m_timer{nullptr};
+    int m_ipcFd{-1};
+    unsigned int m_curstep{0};
+    unsigned int m_percent{0};
+    bool m_waitUpdate{false};
+    QVariantMap m_msg;
 };
 
 #endif // SWUPDATE_H

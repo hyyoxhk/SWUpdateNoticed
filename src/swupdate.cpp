@@ -17,10 +17,14 @@ SWUpdate* SWUpdate::self()
     return m_app;
 }
 
+
 SWUpdate::SWUpdate(QObject *parent)
     : QObject(parent)
+    , m_ipcFd(-1)
+    , m_waitUpdate(false)
+    , m_curstep(0)
+    , m_percent(0)
 {
-    m_ipcFd = -1;
     m_timer = new QTimer(this);
     m_timer->setInterval(1000);
     m_timer->start();
@@ -31,10 +35,10 @@ SWUpdate::~SWUpdate()
 {
     if (m_ipcFd > 0) {
         close(m_ipcFd);
+        m_ipcFd = -1;
     }
 
     delete m_timer;
-    delete m_app;
 }
 
 void SWUpdate::onConnected(void)
@@ -44,7 +48,7 @@ void SWUpdate::onConnected(void)
         qDebug() << "try to connect swupdate";
     }
     if (m_ipcFd > 0) {
-        wait_update = true;
+        m_waitUpdate = true;
         QSocketNotifier *ipcConnect = new QSocketNotifier(m_ipcFd, QSocketNotifier::Read, this);
         connect(ipcConnect, &QSocketNotifier::activated, this, &SWUpdate::onActivated);
 
@@ -64,37 +68,44 @@ void SWUpdate::onActivated(void)
     if (progress_ipc_receive(&m_ipcFd, &msg) <= 0)
         return;
 
-    if (wait_update) {
-        if (msg.status == START || msg.status == RUN) {
-            Q_EMIT start();
-            switch (msg.source) {
-            case SOURCE_UNKNOWN:
-                m_msg.insert("interface", "UNKNOWN");
-                break;
-            case SOURCE_WEBSERVER:
-                m_msg.insert("interface", "WEBSERVER");
-                break;
-            case SOURCE_SURICATTA:
-                m_msg.insert("interface", "BACKEND");
-                break;
-            case SOURCE_DOWNLOADER:
-                m_msg.insert("interface", "DOWNLOADER");
-                break;
-            case SOURCE_CHUNKS_DOWNLOADER:
-                m_msg.insert("interface", "CHUNKS DOWNLOADER");
-                break;
-            case SOURCE_LOCAL:
-                m_msg.insert("interface", "LOCAL");
-                break;
-            }
-            m_curstep = 0;
-            wait_update = false;
-        }
+    if (m_waitUpdate) {
+        handleStartMessage(msg);
     }
 
-    /*
-     * Be sure that string in message are Null terminated
-     */
+    handleUpdateMessage(msg);
+}
+
+void SWUpdate::handleStartMessage(struct progress_msg &msg)
+{
+    if (msg.status == START || msg.status == RUN) {
+        Q_EMIT start();
+        switch (msg.source) {
+        case SOURCE_UNKNOWN:
+            m_msg.insert("interface", "UNKNOWN");
+            break;
+        case SOURCE_WEBSERVER:
+            m_msg.insert("interface", "WEBSERVER");
+            break;
+        case SOURCE_SURICATTA:
+            m_msg.insert("interface", "BACKEND");
+            break;
+        case SOURCE_DOWNLOADER:
+            m_msg.insert("interface", "DOWNLOADER");
+            break;
+        case SOURCE_CHUNKS_DOWNLOADER:
+            m_msg.insert("interface", "CHUNKS DOWNLOADER");
+            break;
+        case SOURCE_LOCAL:
+            m_msg.insert("interface", "LOCAL");
+            break;
+        }
+        m_curstep = 0;
+        m_waitUpdate = false;
+    }
+}
+
+void SWUpdate::handleUpdateMessage(struct progress_msg &msg)
+{
     if (msg.infolen > 0) {
         if (msg.infolen >= sizeof(msg.info) - 1) {
             msg.infolen = sizeof(msg.info) - 1;
@@ -104,7 +115,7 @@ void SWUpdate::onActivated(void)
     }
     msg.cur_image[sizeof(msg.cur_image) - 1] = '\0';
 
-    if (!wait_update) {
+    if (!m_waitUpdate) {
         if (msg.cur_step > 0) {
             m_msg.insert("cur_step", msg.cur_step);
             m_msg.insert("nsteps", msg.nsteps);
@@ -125,12 +136,12 @@ void SWUpdate::onActivated(void)
     switch (msg.status) {
     case SUCCESS:
         m_msg.insert("status", "SUCCESS");
-        wait_update = true;
+        m_waitUpdate = true;
         Q_EMIT stop();
         break;
     case FAILURE:
         m_msg.insert("status", "FAILURE");
-        wait_update = true;
+        m_waitUpdate = true;
         Q_EMIT stop();
         break;
     case DONE:
@@ -141,7 +152,7 @@ void SWUpdate::onActivated(void)
     }
 }
 
-QVariantMap SWUpdate::getMsg()
+QVariantMap SWUpdate::getMsg() const
 {
     return m_msg;
 }
