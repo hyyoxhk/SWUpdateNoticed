@@ -24,7 +24,12 @@ int main(int argc, char *argv[])
 
     QString locale = QLocale::system().name();
     QTranslator qtTranslator;
-    if(qtTranslator.load(QStringLiteral("qt_") + locale, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    QString qtTranslationPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+#else
+    QString qtTranslationPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+#endif
+    if(qtTranslator.load(QStringLiteral("qt_") + locale, qtTranslationPath))
         qApp->installTranslator(&qtTranslator);
 
     QTranslator appTranslator;

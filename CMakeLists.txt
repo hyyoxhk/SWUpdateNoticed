@@ -13,7 +13,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(GNUInstallDirs)
 
-find_package(Qt5 COMPONENTS Core Quick Qml LinguistTools REQUIRED)
+find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick Qml LinguistTools REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick Qml LinguistTools REQUIRED)
+
 find_library(SWUPDATE_LIBRARY NAMES swupdate)
 
 add_subdirectory(src)

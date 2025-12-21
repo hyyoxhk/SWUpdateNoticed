@@ -1,15 +1,24 @@
 set(TS_FILES translations/SWUpdateNoticed_zh_CN.ts)
 
-qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+else()
+    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+endif()
 
 set(SOURCES
     main.cpp
     swupdate.cpp
     qml.qrc
+    ${TS_FILES}
     ${QM_FILES}
 )
 
-add_executable(SWUpdateNoticed ${SOURCES})
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(SWUpdateNoticed MANUAL_FINALIZATION ${SOURCES})
+else()
+    add_executable(SWUpdateNoticed ${SOURCES})
+endif()
 
 set_property(
      TARGET SWUpdateNoticed APPEND
@@ -24,8 +33,8 @@ target_compile_definitions(SWUpdateNoticed
 
 target_link_libraries(SWUpdateNoticed
   PRIVATE
-    Qt5::Gui
-    Qt5::Quick
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Quick
     ${SWUPDATE_LIBRARY}
 )
 
