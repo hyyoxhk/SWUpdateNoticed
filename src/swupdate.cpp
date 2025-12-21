@@ -111,7 +111,7 @@ void SWUpdate::handleUpdateMessage(struct progress_msg &msg)
             msg.infolen = sizeof(msg.info) - 1;
         }
         msg.info[msg.infolen] = '\0';
-        m_msg.insert("info", msg.info);
+        m_msg.insert("info", QString::fromLocal8Bit(msg.info));
     }
     msg.cur_image[sizeof(msg.cur_image) - 1] = '\0';
 
@@ -120,7 +120,7 @@ void SWUpdate::handleUpdateMessage(struct progress_msg &msg)
             m_msg.insert("cur_step", msg.cur_step);
             m_msg.insert("nsteps", msg.nsteps);
             m_msg.insert("cur_percent", msg.cur_percent);
-            m_msg.insert("cur_image", msg.cur_image);
+            m_msg.insert("cur_image", QString::fromLocal8Bit(msg.cur_image));
             m_msg.insert("dwl_percent", msg.dwl_percent);
             m_msg.insert("dwl_bytes", msg.dwl_bytes);
 
