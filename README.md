@@ -6,24 +6,20 @@ A Qt-based user interface for monitoring SWUpdate progress. This application pro
 
 - Qt 5.15 or later
 - CMake 3.14 or later
-- SWUpdate library
-- C++11 compatible compiler
+- SWUpdate library/headers (for `progress_ipc.h`)
+- C++17-compatible compiler
 
 ## Building
 
 ```bash
-# Create build directory
-mkdir build
-cd build
-
-# Configure with CMake
-cmake ..
+# Configure (out-of-source)
+cmake -B build -S .
 
 # Build
-make
+cmake --build build
 
 # Install (optional)
-sudo make install
+cmake --install build
 ```
 
 ## Usage
