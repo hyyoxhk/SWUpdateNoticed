@@ -15,8 +15,15 @@ int main(int argc, char *argv[])
 
     QSharedMemory sharedMemory("swupdate-shared");
     if (!sharedMemory.create(1)) {
-        sharedMemory.attach(QSharedMemory::ReadOnly);
-        sharedMemory.detach();
+        if (sharedMemory.error() == QSharedMemory::AlreadyExists) {
+            if (sharedMemory.attach(QSharedMemory::ReadOnly)) {
+                sharedMemory.detach();
+            } else if (sharedMemory.error() != QSharedMemory::AlreadyExists) {
+                return 1;
+            }
+        } else {
+            return 1;
+        }
         if (!sharedMemory.create(1)) {
             return 0;
         }
