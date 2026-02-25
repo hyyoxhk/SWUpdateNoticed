@@ -10,8 +10,6 @@ set(SOURCES
     main.cpp
     swupdate.cpp
     qml.qrc
-    ${TS_FILES}
-    ${QM_FILES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -20,10 +18,12 @@ else()
     add_executable(SWUpdateNoticed ${SOURCES})
 endif()
 
+set(SWUPDATENOTICED_DATA_DIR "${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}")
+
 set_property(
      TARGET SWUpdateNoticed APPEND
      PROPERTY COMPILE_DEFINITIONS
-     SWUPDATENOTICED_DATA_DIR="${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}"
+     SWUPDATENOTICED_DATA_DIR="${SWUPDATENOTICED_DATA_DIR}"
 )
 
 target_compile_definitions(SWUpdateNoticed
@@ -41,5 +41,11 @@ target_link_libraries(SWUpdateNoticed
 install(TARGETS
     SWUpdateNoticed
     RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    COMPONENT Runtime
+)
+
+install(FILES
+    ${QM_FILES}
+    DESTINATION "${SWUPDATENOTICED_DATA_DIR}"
     COMPONENT Runtime
 )
